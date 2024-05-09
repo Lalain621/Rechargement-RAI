@@ -1,0 +1,49 @@
+// ==UserScript==
+// @name         Rechargement "RAI"
+// @namespace    www.operateur112.fr
+// @version      0.1
+// @description  Recharge les véhicules lors de la conduite sur une régulation d'alerte indisponible.
+// @author       Lalain621
+// @match        https://www.operateur112.fr/missions/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=leitstellenspiel.de
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Déclaration de variable pour le timer de verrouillage
+    let sperrTimer;
+
+    // Écouteur d'événement pour l'événement mouseover sur l'élément avec l'ID 'mission-aao-group'
+    document.getElementById('mission-aao-group')?.addEventListener('mouseover', function (e) {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return; // Vérifiez si la cible est un HTMLElement
+
+        // Trouver le parent le plus proche de type 'a' avec la classe 'btn-warning'
+        const aaoEntry = target.closest('a.aao');
+        if (!aaoEntry) return;
+
+        // Vérifiez si l'élément AAO porte le label "danger"
+        const dangerLabel = aaoEntry.querySelector('.label.label-danger');
+        if (!dangerLabel) return;
+
+        // Timeout : Il faut attendre 500 ms avant de faire quoi que ce soit
+        const timer = setTimeout(function() {
+            if (sperrTimer) return;
+            sperrTimer = true;
+            const reloadButton = document.querySelector('.missing_vehicles_load.btn-warning');
+            if (reloadButton) {
+                reloadButton.click();
+            }
+            setTimeout(function() {
+                sperrTimer = false;
+            }, 3000);
+        }, 500);
+
+        // Écouteur d'événement pour l'événement Mouseleave sur le parent trouvé
+        aaoEntry.addEventListener('mouseleave', () => {
+            clearTimeout(timer);
+        }, { once: true });
+    });
+})();
